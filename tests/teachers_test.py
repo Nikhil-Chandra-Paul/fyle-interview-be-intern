@@ -100,3 +100,37 @@ def test_grade_assignment_draft_assignment(client, h_teacher_1):
     data = response.json
 
     assert data['error'] == 'FyleError'
+
+def test_grade_assignment(client, h_teacher_2):
+    """
+    failure case: only a submitted assignment can be graded
+    """
+    response = client.post(
+        '/teacher/assignments/grade',
+        headers=h_teacher_2
+        , json={
+            "id": 2,
+            "grade": "A"
+        }
+    )
+
+    assert response.status_code == 200
+    data = response.json['data']
+    assert data['id'] == 2
+    assert data['state'] == 'GRADED'
+    assert data['grade'] == 'A'
+    assert data['teacher_id'] == 2
+
+
+def test_home_status(client):
+    response = client.get(
+        '/',
+    )
+    assert response.status_code == 200
+    
+def test_bad_api_request(client, h_teacher_1):
+    response = client.get(
+        '/foo/assignments',
+        headers=h_teacher_1
+    )
+    assert response.status_code == 404
